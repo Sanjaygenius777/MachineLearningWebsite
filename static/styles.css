@@ -1,0 +1,15 @@
+h1{
+    text-align: center;
+    font-family: cursive;
+}
+
+h3{
+    text-align: centercd;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.spam{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

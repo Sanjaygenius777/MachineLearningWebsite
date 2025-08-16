@@ -211,3 +211,23 @@ spamenv/
 # Ignore cache and compiled files
 __pycache__/
 *.pyc
+
+# Machine Learning / Data Science
+# ---------------------------------
+# Datasets - often too large for Git
+data/
+*.csv
+*.json
+*.parquet
+
+# Model files
+*.keras
+*.h5
+*.onnx
+*.pt
+*.pth
+
+# Training outputs
+models/
+checkpoints/
+logs/

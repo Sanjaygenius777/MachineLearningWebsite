@@ -3,15 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPAM CLASSIFIER</title>
+    <title>Spam and Image Classifier</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .message-box {
+            min-height: 150px;
+            max-height: 300px;
+            resize: vertical;
+        }
+    </style>
 </head>
-<body>
-    <h1>SPAM CLASSIFIER</h1>
-    <form method="post">
-        <label>Enter Message:</label>
-        <textarea name="message" rows="5" cols="50" placeholder="Enter your message here...."></textarea><br>
-        <button type="submit">Submit Text</button>
-    </form>
-    <h3>{{ prediction }}</h3>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 md:p-10 rounded-2xl shadow-xl w-full max-w-5xl">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-6">ML Model Classifiers 🕵️🏞️</h1>
+        <p class="text-gray-600 text-center mb-8">Test our text spam detector and our flower image classifier side by side!</p>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="flex-1">
+                <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">Text Spam Detector 🕵️</h2>
+                <p class="text-gray-600 text-center mb-6">Paste or type a message below.</p>
+                <form id="textDetectionForm" action="/detect_text" method="POST" class="space-y-6">
+                    <div>
+                        <label for="message" class="block text-sm font-medium text-gray-700 sr-only">Message</label>
+                        <textarea id="message" name="message" rows="4" class="message-box mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter your message here..." required></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" id="detectTextButton" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors duration-200">
+                            Detect Spam
+                        </button>
+                    </div>
+                </form>
+
+                <div id="textResult" class="mt-8 pt-6 border-t border-gray-200 hidden">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Text Result</h3>
+                    <div id="textResponse" class="bg-gray-50 p-4 rounded-lg text-gray-700 font-medium"></div>
+                </div>
+            </div>
+
+            <div class="flex-1">
+                <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">Image Classifier 🏞️</h2>
+                <p class="text-gray-600 text-center mb-6">Upload an image of a flower to see its class.</p>
+                <form id="imageDetectionForm" action="/classify_image" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <div>
+                        <label for="imageFile" class="block text-sm font-medium text-gray-700">Image File</label>
+                        <input type="file" id="imageFile" name="image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+
+                    <div id="imagePreview" class="mt-4 mb-4 flex justify-center hidden">
+                        <img src="#" alt="Uploaded Image Preview" class="max-w-full h-auto rounded-lg shadow-md max-h-64 object-contain">
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" id="detectImageButton" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-colors duration-200">
+                            Classify Image
+                        </button>
+                    </div>
+                </form>
+
+                <div id="imageResult" class="mt-8 pt-6 border-t border-gray-200 hidden">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Image Result</h3>
+                    <div id="imageResponse" class="bg-gray-50 p-4 rounded-lg text-gray-700 font-medium"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript for Text Spam Detector (from your original code)
+        const textForm = document.getElementById('textDetectionForm');
+        const detectTextButton = document.getElementById('detectTextButton');
+        const textResultSection = document.getElementById('textResult');
+        const textResponse = document.getElementById('textResponse');
+
+        textForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            detectTextButton.textContent = 'Detecting...';
+            detectTextButton.disabled = true;
+            textResultSection.classList.add('hidden');
+
+            try {
+                const response = await fetch(textForm.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+                const result = await response.json();
+                
+                if (result.prediction === "spam") {
+                    textResponse.innerHTML = 'This message is <span class="text-red-500 font-bold">likely SPAM 🚨</span>.';
+                } else {
+                    textResponse.innerHTML = 'This message is <span class="text-green-500 font-bold">NOT spam ✅</span>.';
+                }
+                textResultSection.classList.remove('hidden');
+
+            } catch (error) {
+                textResponse.textContent = 'Error: ' + error.message;
+                textResultSection.classList.remove('hidden');
+                console.error('Error submitting text form:', error);
+            } finally {
+                detectTextButton.textContent = 'Detect Spam';
+                detectTextButton.disabled = false;
+            }
+        });
+        
+        // New JavaScript for Image Classification
+        const imageForm = document.getElementById('imageDetectionForm');
+        const detectImageButton = document.getElementById('detectImageButton');
+        const imageFile = document.getElementById('imageFile');
+        const imageResultSection = document.getElementById('imageResult');
+        const imageResponse = document.getElementById('imageResponse');
+        const imagePreview = document.getElementById('imagePreview');
+        const imagePreviewImg = imagePreview.querySelector('img');
+
+        imageFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreviewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+                imagePreviewImg.src = '#';
+            }
+        });
+
+        imageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (imageFile.files.length === 0) {
+                imageResponse.textContent = 'Please select an image file.';
+                imageResultSection.classList.remove('hidden');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', imageFile.files[0]);
+
+            detectImageButton.textContent = 'Classifying...';
+            detectImageButton.disabled = true;
+            imageResultSection.classList.add('hidden');
+
+            try {
+                const response = await fetch(imageForm.action, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                
+                imageResponse.innerHTML = `Predicted Class: <span class="font-bold">${result.prediction}</span> with <span class="font-bold text-blue-600">${(result.confidence * 100).toFixed(2)}%</span> confidence.`;
+                imageResultSection.classList.remove('hidden');
+
+            } catch (error) {
+                imageResponse.textContent = 'Error: ' + error.message;
+                imageResultSection.classList.remove('hidden');
+                console.error('Error submitting image form:', error);
+            } finally {
+                detectImageButton.textContent = 'Classify Image';
+                detectImageButton.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
