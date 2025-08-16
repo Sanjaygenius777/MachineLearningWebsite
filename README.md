@@ -20,15 +20,10 @@ It is designed as a beginner-friendly project for understanding how to **deploy 
 ---
 
 ## 🧠 Machine Learning Model  
-- Framework: **Keras with TensorFlow**  
+- Framework: **Keras with TensorFlow, Stacking ensemble classifier with randomforestclassifier and logistic regression**  
 - Training Environment: Google Colab (**T4 GPU**)  
-- Exported format: `.keras` model file  
+- Exported format: `.keras` and `.joblib` model file  
 - Supports **CPU-only inference** (no GPU required for predictions)
-
-- Framework: **Stacking ensemble classifier with randomforestclassifier and logistic regression**  
-- Training Environment: Google Colab (**T4 GPU**)  
-- Exported format: `.joblib` model file  
-- Supports **CPU-only inference** (no GPU required for predictions)  
 
 ---
 
