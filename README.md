@@ -6,28 +6,34 @@ It is designed as a beginner-friendly project for understanding how to **deploy 
 ---
 
 ## 📸 Demo Screenshot
-![my model](https://drive.google.com/uc?export=view&id=1xQuej4YlqVOXlNHUD4HCILoP2M8akAYP)
-
+![my model](https://drive.google.com/uc?export=view&id=1V7xyK9pC43K9Xjm25A8TZGH8d6zefzqB)
 ---
 
 ## 🚀 Features  
 - 🔹 Frontend built with **HTML/CSS/JavaScript**  
 - 🔹 Backend using **Flask / Django (Python)** for model integration  
-- 🔹 Machine Learning model trained using **Keras (TensorFlow backend) and sklearn ensemble library**  
+- 🔹 Machine Learning model trained using **Keras (TensorFlow backend)** and **sklearn ensemble library**  
+- 🔹 Integrated **TinyLlama LLM** for intelligent text generation and context-aware responses  
 - 🔹 Predicts/classifies inputs in real-time  
 - 🔹 Easy to deploy locally or on cloud platforms  
 
 ---
 
 ## 🧠 Machine Learning Model  
-- Framework: **Keras with TensorFlow, Stacking ensemble classifier with randomforestclassifier and logistic regression**  
+- Framework: **Keras with TensorFlow**, stacking ensemble classifier combining **RandomForestClassifier** and **Logistic Regression**  
+- LLM: **TinyLlama** integrated for natural language reasoning and contextual text output  
 - Training Environment: Google Colab (**T4 GPU**)  
-- Exported format: `.keras` and `.joblib` model file  
-- Supports **CPU-only inference** (no GPU required for predictions)
+- Exported formats: `.keras`, `.joblib`, and `.gguf` (for TinyLlama)  
+- Supports **CPU-only inference** (no GPU required for predictions)  
 
 ---
 
 ## ⚙️ Installation & Setup  
+1. Clone the repository  
+   ```bash
+   git clone https://github.com/yourusername/yourrepo.git
+   cd yourrepo
+
 
 ### 1️⃣ Clone the repository  
 ```bash
