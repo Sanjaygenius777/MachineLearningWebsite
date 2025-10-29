@@ -1,0 +1,30 @@
+
+
+h1{
+    text-align: center;
+    font-family: cursive;
+}
+
+h3{
+    text-align: centercd;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.spam{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+ body {
+            font-family: 'Inter', sans-serif;
+        }
+        .message-box {
+            min-height: 150px;
+            max-height: 300px;
+            resize: vertical;
+        }
+        /* Added for chat box scrolling */
+        #chatHistoryBox {
+            scroll-behavior: smooth;
+        }

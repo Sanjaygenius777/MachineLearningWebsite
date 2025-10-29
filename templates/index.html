@@ -15,6 +15,10 @@
             max-height: 300px;
             resize: vertical;
         }
+        /* Added for chat box scrolling */
+        #chatHistoryBox {
+            scroll-behavior: smooth;
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
@@ -23,6 +27,7 @@
         <p class="text-gray-600 text-center mb-8">Test our text spam detector and our flower image classifier side by side!</p>
 
         <div class="flex flex-col md:flex-row gap-8">
+            <!-- Text Spam Detector Column -->
             <div class="flex-1">
                 <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">Text Spam Detector 🕵️</h2>
                 <p class="text-gray-600 text-center mb-6">Paste or type a message below.</p>
@@ -44,6 +49,7 @@
                 </div>
             </div>
 
+            <!-- Image Classifier Column -->
             <div class="flex-1">
                 <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">Image Classifier 🏞️</h2>
                 <p class="text-gray-600 text-center mb-6">Upload an image of a flower to see its class.</p>
@@ -70,6 +76,50 @@
                 </div>
             </div>
         </div>
+
+        <!-- === NEW LLM Chat Section === -->
+        <div class="mt-10 pt-8 border-t border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-900 text-center mb-4">LLM Chat 🤖</h2>
+            <p class="text-gray-600 text-center mb-6">Chat with our AI model.</p>
+            
+            <!-- Chat History Box -->
+            <div id="chatHistoryBox" class="h-80 overflow-y-auto bg-gray-50 p-4 rounded-lg border border-gray-300 mb-4 flex flex-col gap-3">
+                <!-- Initial Bot Message -->
+                <div class="flex justify-start">
+                    <div class="p-3 rounded-lg max-w-xs md:max-w-md bg-gray-200 text-gray-800">
+                        Hello! Ask me anything about these models.
+                    </div>
+                </div>
+
+                <!-- Loading Indicator (hidden by default) -->
+                <div id="chatLoadingIndicator" class="flex justify-start hidden">
+                    <div class="p-3 rounded-lg bg-gray-200 text-gray-800">
+                        <span class="animate-pulse">...</span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <!-- Chat Input Form -->
+            <form id="chatForm" class="flex flex-col sm:flex-row gap-3" action="/chat" method="post">
+                <label for="chatInput" class="sr-only">Chat Message</label>
+                <input 
+                    type="text" 
+                    id="chatInput"
+                    class="flex-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Type your message..." autocomplete="off"
+                />
+                <button 
+                    type="submit"
+                    id="chatSendButton"
+                    class="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-200 disabled:opacity-50"
+                >
+                    Send
+                </button>
+            </form>
+        </div>
+        <!-- === End of NEW LLM Chat Section === -->
+
     </div>
 
     <script>
@@ -116,7 +166,7 @@
             }
         });
         
-        // New JavaScript for Image Classification
+        // JavaScript for Image Classification (from your original code)
         const imageForm = document.getElementById('imageDetectionForm');
         const detectImageButton = document.getElementById('detectImageButton');
         const imageFile = document.getElementById('imageFile');
@@ -180,6 +230,99 @@
                 detectImageButton.disabled = false;
             }
         });
+
+        // === NEW JavaScript for LLM Chat ===
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendButton = document.getElementById('chatSendButton');
+        const chatHistoryBox = document.getElementById('chatHistoryBox');
+        const chatLoadingIndicator = document.getElementById('chatLoadingIndicator');
+
+        // Helper function to scroll chat to the bottom
+        function scrollToChatBottom() {
+            chatHistoryBox.scrollTop = chatHistoryBox.scrollHeight;
+        }
+
+        // Helper function to add a message to the chat history
+        function appendChatMessage(role, content) {
+            // Remove the loading indicator before adding a new message
+            chatLoadingIndicator.classList.add('hidden');
+
+            const messageWrapper = document.createElement('div');
+            messageWrapper.classList.add('flex');
+
+            const messageBubble = document.createElement('div');
+            messageBubble.classList.add('p-3', 'rounded-lg', 'max-w-xs', 'md:max-w-md');
+            messageBubble.textContent = content;
+
+            if (role === 'user') {
+                messageWrapper.classList.add('justify-end');
+                messageBubble.classList.add('bg-blue-500', 'text-white');
+            } else {
+                messageWrapper.classList.add('justify-start');
+                messageBubble.classList.add('bg-gray-200', 'text-gray-800');
+            }
+
+            messageWrapper.appendChild(messageBubble);
+            chatHistoryBox.appendChild(messageWrapper);
+            
+            // Re-append loading indicator if it was a user message
+            if (role === 'user') {
+                chatLoadingIndicator.classList.remove('hidden');
+                chatHistoryBox.appendChild(chatLoadingIndicator); // Move loading to end
+            }
+
+            scrollToChatBottom();
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = chatInput.value.trim();
+            
+            if (!message) return;
+
+            // 1. Add user message to chat
+            appendChatMessage('user', message);
+            
+            // 2. Clear input and disable form
+            chatInput.value = '';
+            chatSendButton.disabled = true;
+
+            // 3. Send to backend
+            try {
+                const response = await fetch(chatForm.action, { // Use form action
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json' 
+                    },
+                    // FIX 1: Send as JSON object
+                    body: JSON.stringify({ message: message }) 
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                // FIX 2: Add 'await'
+                const result = await response.json(); // Expects { "reply": "..." }
+
+                // FIX 3: Access the 'reply' property
+                appendChatMessage('bot', result.reply);
+
+            } catch (error) {
+                // FIX 4: Add error handling
+                appendChatMessage('bot', 'Error: ' + error.message);
+                console.error('Error submitting chat form:', error);
+            } finally {
+                // FIX 4: Add finally block to re-enable button
+                chatSendButton.disabled = false;
+            }
+        });
+
+        // Scroll to bottom on load (for the welcome message)
+        scrollToChatBottom();
+
     </script>
 </body>
 </html>
+

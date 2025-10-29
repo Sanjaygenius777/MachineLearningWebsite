@@ -1,4 +1,7 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
+
+
 import joblib
 from scipy.sparse import csr_matrix
 from keras.models import load_model
@@ -11,6 +14,7 @@ from transformers import pipeline
 
 
 app=Flask(__name__)
+CORS(app)
 
 model=joblib.load('models/spam.joblib')
 vectorizer=joblib.load('models/tfidf.joblib')
